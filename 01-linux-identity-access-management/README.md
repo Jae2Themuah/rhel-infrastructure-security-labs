@@ -179,3 +179,166 @@ Key takeaways:
 ---
 
 **Documentation Note:** This project records guided exercises performed in temporary Red Hat training environments. It does not represent a production deployment, RHCSA certification, or a completed compliance assessment.
+
+---
+
+# Lab Evidence & Technical Validation
+
+## Evidence Overview
+
+The following screenshots document hands-on Linux administration exercises performed in temporary Red Hat Enterprise Linux training environments.
+
+The exercises covered identity management, group-based authorization, file ownership, permission management, setgid inheritance, access-control testing, and default file permissions.
+
+Each screenshot provides supporting evidence for a specific configuration or validation activity.
+
+### Evidence 01: Supplementary Group Membership
+
+![Linux user group verification](screenshots/01-linux-identity-access-management.png)
+
+**Figure 1:** Configured supplementary group membership for `guest1` using `usermod` and verified the resulting primary and supplementary groups with `id`.
+
+**Technical validation:** Confirmed that `guest1` retained its primary group while gaining membership in `linuxadmins`.
+
+### Evidence 02: User Creation and Group Assignment
+
+![Linux user creation and group assignment](screenshots/02-user-creation-and-group-assignment.png)
+
+**Figure 2:** Created a second Linux user, assigned supplementary group membership, and verified the configuration using `id` and `getent`.
+
+**Technical validation:** Confirmed that `guest1` and `guest2` belonged to the `linuxadmins` group.
+
+### Evidence 03: Shared Directory Group Ownership
+
+![Shared directory group ownership](screenshots/03-shared-directory-group-ownership.png)
+
+**Figure 3:** Created `/home/linuxprojects`, assigned group ownership to `linuxadmins` using `chgrp`, and inspected the resulting configuration with `ls -ld`.
+
+**Technical validation:** Confirmed that the directory was owned by `root` with `linuxadmins` as its group.
+
+### Evidence 04: Directory Permissions and setgid
+
+![Linux directory permissions and setgid](screenshots/04-directory-permissions-setgid.png)
+
+**Figure 4:** Configured directory permissions using `chmod 770` and enabled setgid using `chmod g+s`.
+
+**Verified configuration:**
+
+```text
+drwxrws--- root linuxadmins
+```
+
+**Security outcome:** Restricted directory access to its owner and authorized group members while enabling group inheritance for newly created files and subdirectories.
+
+### Evidence 05: Authorized User Access
+
+![Authorized Linux user access](screenshots/05-authorized-user-access-setgid-validation.png)
+
+**Figure 5:** Validated that `guest1` and `guest2` could create files inside the shared directory.
+
+**Technical validation:** Confirmed that newly created files retained their respective user owners while inheriting the `linuxadmins` group.
+
+**Security relevance:** Demonstrates authorized access and setgid group inheritance.
+
+### Evidence 06: Unauthorized Access Denied
+
+![Linux unauthorized access denied](screenshots/06-unauthorized-access-denied.png)
+
+**Figure 6:** Created an unauthorized user, `guest3`, and attempted to create a file inside the restricted directory.
+
+**Observed result:**
+
+```text
+Permission denied
+```
+
+**Security outcome:** Confirmed that users outside the authorized group could not create files inside the protected directory.
+
+### Evidence 07: Access Granted Through Group Membership
+
+![Linux access granted through group membership](screenshots/07-access-granted-through-group-membership.png)
+
+**Figure 7:** Added `guest3` to `linuxadmins` and repeated the previously denied operation.
+
+**Technical validation:** File creation succeeded after group membership was updated.
+
+**Security outcome:** Demonstrated that access could be granted by modifying group membership without weakening the directory's existing permissions.
+
+### Evidence 08: Existing File Modification Restricted
+
+![Linux group file access denied](screenshots/08-group-file-access-denied.png)
+
+**Figure 8:** Attempted to update an existing file owned by `guest3` while operating as `guest2`.
+
+**Observed result:**
+
+```text
+Permission denied
+```
+
+**Technical validation:** Demonstrated that shared group membership and directory write access do not automatically permit modification of another user's existing file.
+
+**Note:** This test used `touch` to attempt a timestamp update. It did not test modification of file contents.
+
+### Evidence 09: Default File Permissions Using umask
+
+![Linux umask configuration](screenshots/09-umask-default-permissions.png)
+
+**Figure 9:** Inspected the root shell's initial `umask`, changed it from `0022` to `0002`, and created a test file.
+
+**Initial configuration:**
+
+```text
+umask 0022
+```
+
+**Updated configuration:**
+
+```text
+umask 0002
+```
+
+**Verified new file permissions:**
+
+```text
+-rw-rw-r-- root linuxadmins
+```
+
+**Technical validation:** Confirmed that the updated mask permitted group-write access on a newly created regular file.
+
+**Security relevance:** Demonstrates how default permission settings influence access controls in shared Linux environments.
+
+---
+
+## Security Validation Summary
+
+| Security Test | Expected Behavior | Observed Result |
+|---|---|---|
+| Authorized user creates a file | Allowed | PASS |
+| Unauthorized user creates a file | Denied | PASS |
+| New files inherit the shared directory group | Inherit `linuxadmins` | PASS |
+| Group membership grants authorized access | Allowed after membership change | PASS |
+| Group member updates another user's non-group-writable file | Denied | PASS |
+| Changing root shell umask affects newly created file permissions | New file receives group-write permission | PASS |
+| Group member modifies another user's group-writable file contents | Modification succeeds | NOT YET TESTED |
+
+## Technical Limitations
+
+These exercises were completed in temporary, browser-based Red Hat training environments.
+
+The documented configurations were not deployed to production infrastructure.
+
+The initial exercises involved guided training and assisted troubleshooting. Independent implementation and validation remain areas for continued development.
+
+The cross-user file-content modification test remains incomplete and will be performed during a future lab.
+
+These demonstrations establish foundational Linux administration skills but do not constitute a formal security assessment or evidence of organizational compliance with NIST SP 800-171, CMMC, or DISA STIG requirements.
+
+## Planned Improvements
+
+1. Independently recreate the environment on a personal RHEL virtual machine.
+2. Test file-content modification across authorized group members.
+3. Investigate default permissions and umask behavior for individual users.
+4. Evaluate Access Control Lists (ACLs) for more granular authorization.
+5. Add complete environment details and reproducible configuration instructions.
+6. Extend the project with applicable Linux security hardening exercises.
