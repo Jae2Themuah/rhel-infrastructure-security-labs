@@ -75,3 +75,21 @@ federal cybersecurity.
 
 All projects are conducted in training environments
 unless otherwise specified.
+
+## Documented Projects
+
+### Project 01 — Linux Identity & Access Management
+
+**Status:** Guided labs completed | Independent practice ongoing
+
+Hands-on Red Hat Enterprise Linux administration covering:
+
+- Linux user and group administration
+- Primary and supplementary groups
+- File ownership and numeric permissions
+- Shared directory configuration using setgid
+- Authorized and unauthorized access testing
+- Permission-based file searches
+- Linux troubleshooting and validation
+
+**[View Project 01 — Technical Documentation](./01-linux-identity-access-management/README.md)**
